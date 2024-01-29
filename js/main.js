@@ -3,6 +3,10 @@ Vue.component('product', {
         premium: {
             type: Boolean,
             required: true
+        },
+        cart: {
+            type: Array,
+            required: true
         }
     },
     template: `
@@ -26,12 +30,9 @@ Vue.component('product', {
         <ul>
           <li v-for="size in sizes">{{ size }}</li>
         </ul>
-        <div class="cart">
-          <p>Cart({{ cart }})</p>
-        </div>
-        <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
-        <br>
-        <button v-on:click="decrementCart" class="decrementCart">Remove from cart</button><br>
+      <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
+         <br>
+      <button v-on:click="removeFromCart" class="removeFromCart">Remove from cart</button>
         <p>Shipping: {{ shipping }}</p>
         <a :href="link">More products like this</a>
      
@@ -63,7 +64,6 @@ Vue.component('product', {
                 }
             ],
             sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
-            cart: 0,
         };
     },
     computed: {
@@ -87,11 +87,13 @@ Vue.component('product', {
     },
     methods: {
         addToCart() {
-            this.cart += 1;
+            this.$emit('add-to-cart', this.variants[0].variantId);
         },
-        decrementCart() {
-            if (this.cart > 0) {
-                this.cart -= 1;
+
+        removeFromCart() {
+
+            if (this.cart.length > 0) {
+                this.$emit('remove-from-cart', this.cart[this.cart.length - 1]);
             }
         },
         updateProduct(variantImage) {
@@ -99,23 +101,23 @@ Vue.component('product', {
         }
     }
 });
-Vue.component('product-details', {
-    props: {
-        details: {
-            type: Array,
-            required: true
-        }
-    },
-    template: `
-        <ul>
-            <li v-for="detail in details">{{ detail }}</li>
-        </ul>
-    `
-});
 
 let app = new Vue({
     el: '#app',
     data: {
-        premium: true
+        premium: true,
+        cart: []
+    },
+    methods: {
+        updateCart(id) {
+            this.cart.push(id);
+        },
+        // Метод для удаления товара из корзины
+        removeFromCart(id) {
+            let index = this.cart.indexOf(id);
+            if (index !== -1) {
+                this.cart.splice(index, 1);
+            }
+        }
     }
 });
