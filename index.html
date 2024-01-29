@@ -14,11 +14,24 @@
 <div id="app">
     <div class="product">
         <div class="product-image">
-            <img :src="image" :alt="altText" style="max-width: 150%; max-height: 250px;">
+            <img :src="image" :alt="altText" style="max-width: 200px; max-height: 250px;">
         </div>
         <div class="product-info">
             <h1>{{ product }}</h1>
+            <p v-if="inventory > 10">In stock</p>
+            <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
+            <p v-else>Out of stock</p>
             <p>{{ description }}</p>
+            <ul>
+                <li v-for="detail in details">{{ detail }}</li>
+            </ul>
+            <div v-for="variant in variants" :key="variant.variantId">
+                <p>{{ variant.variantColor }}</p>
+            </div>
+            <ul>
+                <li v-for="size in sizes">{{ size }}</li>
+            </ul>
+            <span v-if="onSale">On Sale</span> <br>
             <a :href="link">More products like this</a>
         </div>
     </div>
