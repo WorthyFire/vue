@@ -165,8 +165,8 @@ Vue.component('product', {
         </ul>
         <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
         <br>
-        <button v-on:click="removeFromCart" class="removeFromCart">Remove from cart</button>
-        <p>Shipping: {{ shipping }}</p>
+        <button v-on:click="removeFromCart" class="removeFromCart">Remove from cart</button> 
+        <br>
         <a :href="link">More products like this</a>
         <product-tabs :reviews="reviews" :premium="premium" :details="details"></product-tabs>
       </div>
