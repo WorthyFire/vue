@@ -9,17 +9,17 @@ Vue.component('product-review', {
                     <li v-for="error in errors">{{ error }}</li>
                 </ul>
             </p>
-
+ 
             <p>
                 <label for="name">Имя:</label>
                 <input id="name" v-model="name" placeholder="Имя">
             </p>
-
+ 
             <p>
                 <label for="review">Отзыв:</label>
                 <textarea id="review" v-model="review"></textarea>
             </p>
-
+ 
             <p>
                 <label for="rating">Рейтинг:</label>
                 <select id="rating" v-model.number="rating">
@@ -30,13 +30,13 @@ Vue.component('product-review', {
                     <option>1</option>
                 </select>
             </p>
-
+ 
             <p>
                 <label for="recommend">Вы бы порекомендовали этот продукт?</label><br>
                 <input type="radio" id="recommend-yes" value="yes" v-model="recommend"> <label for="recommend-yes">Да</label><br>
                 <input type="radio" id="recommend-no" value="no" v-model="recommend"> <label for="recommend-no">Нет</label>
             </p>
-
+ 
             <p>
                 <input type="submit" value="Отправить">
             </p>
@@ -148,7 +148,7 @@ Vue.component('product', {
     template: `
     <div class="product">
       <div class="product-image">
-        <img :src="image" :alt="altText">
+        <img :src="selectedVariant.variantImage" :alt="altText">
       </div>
       <div class="product-info">
         <h1>{{ title }}</h1>
@@ -157,18 +157,19 @@ Vue.component('product', {
         <p v-else-if="inventory <= 10 && inventory > 0">Almost sold out!</p>
         <p v-else>Out of stock</p>
         <p v-bind:class="{ outOfStock: !inStock }">{{ description }}</p>
-        <div v-for="variant in variants" :key="variant.variantId">
-          <div @mouseover="updateProduct(variant.variantImage)" class="color-square" :style="{ 'background-color': variant.variantColor }"></div>
+        <div v-for="(variant, index) in variants" :key="variant.variantId">
+          <div @mouseover="updateProduct(index)" class="color-square" :style="{ 'background-color': variant.variantColor }"></div>
         </div>
         <ul>
           <li v-for="size in sizes">{{ size }}</li>
         </ul>
         <button v-on:click="addToCart" :disabled="!inStock" :class="{ disabledButton: !inStock }">Add to cart</button>
         <br>
-        <button v-on:click="removeFromCart" class="removeFromCart">Remove from cart</button> 
+        <button v-on:click="removeFromCart" class="removeFromCart">Remove from cart</button>
         <br>
         <a :href="link">More products like this</a>
         <product-tabs :reviews="reviews" :premium="premium" :details="details"></product-tabs>
+        <p>Number of socks in cart: {{ cartQuantity }}</p>
       </div>
     </div>
   `,
@@ -176,7 +177,6 @@ Vue.component('product', {
         return {
             product: "Socks",
             brand: 'Vue Mastery',
-            image: "./assets/vmSocks-green-onWhite.jpg",
             altText: "A pair of socks",
             description: "A pair of warm, fuzzy socks",
             inStock: true,
@@ -189,14 +189,17 @@ Vue.component('product', {
                     variantId: 2234,
                     variantColor: 'green',
                     variantImage: "./assets/vmSocks-green-onWhite.jpg",
+                    variantQuantity: 10
                 },
                 {
                     variantId: 2235,
                     variantColor: 'blue',
                     variantImage: "./assets/vmSocks-blue-onWhite.jpg",
+                    variantQuantity: 10
                 }
             ],
-            sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']
+            sizes: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+            selectedVariant: {}
         };
     },
     computed: {
@@ -210,26 +213,27 @@ Vue.component('product', {
                 return `${this.product} by ${this.brand} is not on sale.`;
             }
         },
-        shipping() {
-            if (this.premium) {
-                return "Free";
-            } else {
-                return 2.99;
-            }
+        cartQuantity() {
+            return this.cart.filter(item => item === this.selectedVariant.variantId).length;
         }
     },
     methods: {
         addToCart() {
-            this.$emit('add-to-cart', this.variants[0].variantId);
+            this.$emit('add-to-cart', this.selectedVariant.variantId);
         },
         removeFromCart() {
-            if (this.cart.length > 0) {
-                this.$emit('remove-from-cart', this.cart[this.cart.length - 1]);
+            let index = this.cart.lastIndexOf(this.selectedVariant.variantId);
+            if (index !== -1) {
+                this.$emit('remove-from-cart', index);
             }
         },
-        updateProduct(variantImage) {
-            this.image = variantImage;
+        updateProduct(index) {
+            this.selectedVariant = this.variants[index];
         }
+    },
+    mounted() {
+        // Set the initial selected variant
+        this.selectedVariant = this.variants[0];
     }
 });
 
@@ -279,11 +283,8 @@ let app = new Vue({
         updateCart(id) {
             this.cart.push(id);
         },
-        removeFromCart(id) {
-            let index = this.cart.indexOf(id);
-            if (index !== -1) {
-                this.cart.splice(index, 1);
-            }
+        removeFromCart(index) {
+            this.cart.splice(index, 1);
         }
     },
     mounted() {

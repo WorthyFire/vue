@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/main.css">
     <script defer src="js/vue.js"></script>
     <script defer src="js/main.js"></script>
-    <title>Product App</title>
+    <title>Socks Shop</title>
 </head>
 <body>
 <div id="app">
@@ -17,7 +17,6 @@
     <product :premium="premium" :cart="cart"  :reviews="reviews" @add-to-cart="updateCart" @remove-from-cart="removeFromCart "></product>
 </div>
 
-<!-- Вкладки для отзывов -->
 <product-tabs :reviews="reviews" :premium="premium" :details="details"></product-tabs>
 
 
